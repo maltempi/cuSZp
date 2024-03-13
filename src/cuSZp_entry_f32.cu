@@ -31,7 +31,8 @@ void SZp_compress_hostptr_f32(float* oriData, unsigned char* cmpBytes, size_t nb
     dim3 blockSize(bsize);
     dim3 gridSize(gsize);
     SZp_compress_kernel_f32<<<gridSize, blockSize, 0, stream>>>(d_oriData, d_cmpData, d_cmpOffset, d_flag, errorBound, nbEle);
-    cudaDeviceSynchronize();
+    //cudaDeviceSynchronize();
+    cudaStreamSynchronize(stream);
 
     // Obtain compression ratio and move data back to CPU.  
     *cmpSize = (size_t)d_cmpOffset[cmpOffSize-1] + (nbEle+31)/32;
@@ -76,7 +77,8 @@ void SZp_decompress_hostptr_f32(float* decData, unsigned char* cmpBytes, size_t 
     dim3 blockSize(bsize);
     dim3 gridSize(gsize);
     SZp_decompress_kernel_f32<<<gridSize, blockSize, 0, stream>>>(d_decData, d_cmpData, d_cmpOffset, d_flag, errorBound, nbEle);
-    cudaDeviceSynchronize();
+//    cudaDeviceSynchronize();
+    cudaStreamSynchronize(stream);
 
     // Move data back to CPU.
     cudaMemcpy(decData, d_decData, sizeof(float)*nbEle, cudaMemcpyDeviceToHost);
@@ -111,7 +113,8 @@ void SZp_compress_deviceptr_f32(float* d_oriData, unsigned char* d_cmpBytes, siz
     dim3 blockSize(bsize);
     dim3 gridSize(gsize);
     SZp_compress_kernel_f32<<<gridSize, blockSize, 0, stream>>>(d_oriData, d_cmpBytes, d_cmpOffset, d_flag, errorBound, nbEle);
-    cudaDeviceSynchronize();
+    //cudaDeviceSynchronize();
+    cudaStreamSynchronize(stream);
 
     // Obtain compression ratio and move data back to CPU.  
     *cmpSize = (size_t)d_cmpOffset[cmpOffSize-1] + (nbEle+31)/32;
@@ -141,7 +144,8 @@ void SZp_decompress_deviceptr_f32(float* d_decData, unsigned char* d_cmpBytes, s
     dim3 blockSize(bsize);
     dim3 gridSize(gsize);
     SZp_decompress_kernel_f32<<<gridSize, blockSize, 0, stream>>>(d_decData, d_cmpBytes, d_cmpOffset, d_flag, errorBound, nbEle);
-    cudaDeviceSynchronize();
+    //cudaDeviceSynchronize();
+    cudaStreamSynchronize(stream);
 
     // Free memoy that is used.
     cudaFree(d_cmpOffset);
